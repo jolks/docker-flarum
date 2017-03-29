@@ -24,9 +24,10 @@ if [ -z "$FORUM_URL" ]; then
 fi
 
 # Set permissions
-chown -R $UID:$GID /flarum /etc/nginx /etc/php7.1 /var/log /var/lib/nginx /tmp /etc/s6.d
-
-cd /flarum/app
+# NOTE: /usr/local/etc is the actual location of php-fpm.conf
+# chown -R $UID:$GID /flarum /etc/nginx /etc/php7 /var/log /var/lib/nginx /tmp /etc/s6.d
+chown -R $UID:$GID /flarum /etc/nginx /usr/local/etc /var/log /var/lib/nginx /tmp /etc/s6.d
+chmod -R 777 /flarum
 
 # Custom HTTP errors pages
 if [ -d 'assets/errors' ]; then
@@ -45,9 +46,9 @@ if [ -f 'extensions/composer.repositories.txt' ]; then
   done < extensions/composer.repositories.txt
 fi
 
-# if no installation was performed before
-if [ -e 'assets/rev-manifest.json' ]; then
-
+if [ -f 'assets/rev-manifest.json' ]; then
+  # Ignore Fatal error: Uncaught PDOException: SQLSTATE[HY000] [2002] Connection refused in /flarum/app/vendor/illuminate/database/Connectors/Connector.php:55
+  # Just clear your browser cookie and relogin
   echo "[INFO] Flarum already installed, init app..."
 
   sed -i -e "s|<DEBUG>|${DEBUG}|g" \
@@ -80,6 +81,7 @@ if [ -e 'assets/rev-manifest.json' ]; then
 
 else
 
+  # if no installation was performed before
   echo "[INFO] First launch, you must install flarum by opening your browser and setting database parameters."
   rm -rf config.php
 
@@ -89,4 +91,4 @@ fi
 chown -R $UID:$GID /flarum
 
 # RUN !
-exec su-exec $UID:$GID /bin/s6-svscan /etc/s6.d
+/bin/s6-svscan /etc/s6.d

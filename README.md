@@ -20,7 +20,8 @@ Flarum is the next-generation forum software that makes online discussion fun. I
 
 ### Ports
 
-- **8888**
+- Port 8888 is used by `nginx`.
+- Port 9000 is used by `php-fpm`.
 
 ### Volume
 
